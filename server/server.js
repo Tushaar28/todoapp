@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const app = express();
 const http = require('http').createServer(app); 
 const bodyParser = require('body-parser');
-
+const path = require('path');
 //To contain all the incoming parameters in a container
 app.use(bodyParser.json());
 
@@ -31,8 +31,7 @@ mongoose.connection.on('error', (error) => {
 mongoose.set('useCreateIndex', true);
 
 app.get('/', (req,res)=>{
-    res.send(`TODOAPP SERVER!!`);
-})
+    res.sendFile(path.join(__dirname, '../client', 'index.html'));})
 
 //Make a port for our server
 const port = process.env.PORT || 3001;
