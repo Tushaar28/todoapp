@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To Do List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    #add {
+      visibility: hidden;
+    }
+    #newTask{
+      margin-top: 30px;
+      margin-bottom: 30px;
+      margin-right: 30px;
+    }
+    #sortBy{
+      margin-top: 30px;
+      margin-bottom: 30px;
+      margin-right: 60px;
+    }
+  </style>
+  <script>
+    function func(){
+      var elem = document.getElementById("add")
+      elem.style.visibility = "visible"
+      window.location.href = "#addTask"
+    }
+  </script>
+</head>
+
+<body>
+  <!--                                         ADD TASK BUTTON                                         -->
+  <div class="text-right">
+    <button type="submit" class="btn btn-info" id="newTask" onclick=func()>Add Task</button>
+  </div>
+  
+  <div class="container">
+    <div class="alert alert-success" role="alert" style="text-align: center">
+      YOUR TASKS
+    </div>
+    </div>
+<!--                                             SORT BY                                               -->
+    <div class = "text-right" id = "sortBy">
+      <div class="dropdown show">
+        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Sort By
+        </a>       
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <a class="dropdown-item" href="#">Due Date</a><br>
+          <a class="dropdown-item" href="#">Priority</a><br>
+          <a class="dropdown-item" href="#">Status</a><br>
+        </div>
+      </div>
+    </div>
+  <div class="container">
+    <div class="container">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Title</th>
+            <th scope="col">Due Date</th>
+            <th scope="col">Priority</th>
+            <th scope="col">Status</th>
+            <th scope="col">View Notes</th>
+          </tr>
+        </thead>
+        <tbody id="setRow" />
+      </table>
+    </div>
+    <div id = "add">
+    <div class="alert alert-info" role="alert" style="text-align: center">
+      CREATE A NEW TASK
+    </div>
+
+    <div class="container">
+      <form action="" class="addTodo" id = "addTask">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" class="form-control" id="title" placeholder="Enter title" required><br>
+          <label for="description">Description</label>
+          <input type="text" class="form-control" id="description" placeholder="Enter description"><br>
+          <label for="date">Due Date</label>
+          <input type="date" class="form-control" id="due_date"><br>
+          <label for="priority">Priority :&nbsp;&nbsp;</label>
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary active">
+              <input type="radio" name="options" id="priority" value="1"> Low
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="priority" value="2" checked> Medium
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="priority" value="3"> High
+            </label>
+          </div>
+          <br /><br />
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+        <button type="reset" class="btn btn-danger">Reset</button>
+      </form>
+    </div>
+  </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+    const apiUrl = 'https://fathomless-scrubland-15214.herokuapp.com/todos'
+    const proxyurl = "https://peaceful-temple-16111.herokuapp.com";
+    let serialNumber = 1;
+    const sendCred = async () => {
+      return await new Promise(async (resolve, reject) => {
+        try {
+          let data = {
+            title: $('#title').val(),
+            description: $('#description').val(),
+            dueDate: $('#due_date').val(),
+            priority: $('#priority').val(),
+            status: $('#status').val(),
+          }
+          let response = await fetch(`${proxyurl}/${apiUrl}/addTask`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+
+          response = await response.text();
+          alert(response.alert);
+          console.log(serialNumber)
+          resolve(response);
+        } catch (err) {
+          alert(err);
+          reject(err);
+        }
+      })
+    }
+
+    const getData = async () => {
+      fetch(`${proxyurl}/${apiUrl}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(res => {
+          console.log(res)
+          return res.json();
+        })
+        .then(data => {
+          data = data.todo
+          data.map((todo, i) => {
+              let title = todo.title
+              title = title.toUpperCase()
+              if (todo.priority == 1) setPriority = 'Low'
+              if (todo.priority == 2) setPriority = 'Medium'
+              if (todo.priority == 3) setPriority = 'High'
+
+              if (todo.status == true) setStatus = 'Complete'
+              if (todo.status == false) setStatus = 'Incomplete'
+              let due_date = todo.due_date.toString().slice(0, 10)
+              $('#setRow').append($(`<tr id="setData${serialNumber}"><th scope="row">`).text(serialNumber))
+              $(`#setData${serialNumber}`).append($(`<td id="viewTitle${serialNumber}">`).text(title))
+              $(`#viewTitle${serialNumber}`).append($('<p>').text(`Description : ${todo.description}`))
+              $(`#setData${serialNumber}`).append($(`
+                <td id="viewDate${serialNumber}">
+                  ${due_date}
+                  <a data-toggle='collapse' data-target='#collapseChangeDate${serialNumber}' aria-expanded='false'
+                    aria-controls='collapseExample'>
+                  <i style="margin-left: 3px" class="fa fa-pencil fa-lg" aria-hidden="true"></i>
+                  </a>
+                  <div class='collapse' id='collapseChangeDate${serialNumber}'>
+                    <br />
+                    <form action='' class='changeDate'>
+                      <div class='form-group'>
+                        <input type="date" class="form-control" id="inputChangedDate${serialNumber}"><br>
+                      </div>
+                      <button type='submit' onclick='changeDate(${i})'
+                        class='btn btn-outline-secondary'>Add</button>
+                    </form>
+                  </div>
+
+                </td>
+              `))
+              $(`#setData${serialNumber}`).append($(`
+                <td id="viewPriority${serialNumber}">
+                  ${setPriority}
+                  <a data-toggle='collapse' data-target='#collapseChangePriority${serialNumber}'
+                    aria-expanded='false' aria-controls='collapseExample'>
+                    <i style="margin-left: 3px" class="fa fa-pencil fa-lg" aria-hidden="true"></i>
+                  </a>
+                  <div class='collapse' id='collapseChangePriority${serialNumber}'>
+                    <br />
+                    <form action='' class='changePriority' id ='priorityForm${serialNumber}'>
+                      <div class='form-group'>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                          <label class="btn btn-secondary active">
+                            <input type="radio" name="optionPriority${serialNumber}"
+                               value='1'
+                              checked> Low
+                          </label>
+                          <label class="btn btn-secondary">
+                            <input type="radio" name="optionPriority${serialNumber}"
+                               value='2'> Medium
+                          </label>
+                          <label class="btn btn-secondary">
+                            <input type="radio" name="optionPriority${serialNumber}"
+                               value='3'> High
+                          </label>
+                        </div>
+                      </div>
+                      <button type='submit' onclick='changePriority(${i})'
+                        class='btn btn-outline-secondary'>Change</button>
+                    </form>
+                  </div>
+                  </td>
+                  `))
+
+              $(`#setData${serialNumber}`).append($(`
+                <td id="viewStatus${serialNumber}">
+                  ${setStatus}
+                  <a data-toggle='collapse' data-target='#collapseChangeStatus${serialNumber}'
+                    aria-expanded='false' aria-controls='collapseExample'>
+                    <i style="margin-left: 3px" class="fa fa-pencil fa-lg" aria-hidden="true"></i>
+                  </a>
+                  <div class='collapse' id='collapseChangeStatus${serialNumber}'>
+                    <br />
+                    <form action='' class='changeStatus' id='statusForm${serialNumber}'>
+                      <div class='form-group'>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                          <label class="btn btn-secondary active">
+                            <input type="radio" name="optionStatus${serialNumber}"
+                              value='true' checked> Complete
+                          </label>
+                          <label class="btn btn-secondary">
+                            <input type="radio" name="optionStatus${serialNumber}"
+                              value='false'> Incomplete
+                          </label>
+                        </div>
+                      </div>
+                      <button type='submit' onclick='changeStatus(${i})'
+                        class='btn btn-outline-secondary'>Change</button>
+                    </form>
+                  </div>
+                </td>
+              `))
+              $(`#setData${serialNumber}`).append($(`
+                <td>
+                  <div class='btn-group' role='group' aria-label='Basic example'>
+                    <button class='btn btn-primary' type='button' data-toggle='collapse'
+                      data-target='#collapseNotes${serialNumber}'
+                      aria-expanded='false' aria-controls='collapseExample'>
+                      View
+                    </button>
+                    <button class='btn btn-success' type='button' data-toggle='collapse'
+                      data-target='#collapseAddNote${serialNumber}'
+                      aria-expanded='false' aria-controls='collapseExample'>
+                      Add
+                    </button>
+                  </div>
+
+                  <div class='collapse' id='collapseNotes${serialNumber}'>
+                    <ul id='viewNotes${serialNumber}' class='list-group list-group-flush'></ul>
+                  </div>
+
+                  <div class='collapse' id='collapseAddNote${serialNumber}'>
+                    <br />
+                    <form action='' class='addNote'>
+                      <div class='form-group'>
+                        <input type='text' class='form-control' id='inputNote${serialNumber}' placeholder='Add Note...'>
+                      </div>
+                      <button type='submit' onclick='addNotes(${i})'
+                        class='btn btn-outline-secondary'>Add</button>
+                    </form>
+                  </div>
+                </td>
+              `))
+              todo.notes.map((notes) => {
+                $(`#viewNotes${serialNumber}`).append($('<li class="list-group-item">').text(notes.notes))
+              })
+              serialNumber++;
+            }
+
+          )
+        })
+        .catch(error => {
+          alert(error)
+        })
+
+    }
+
+    const addNotes = async (serial) => {
+      $('.addNote').submit(function (e) {
+        e.preventDefault();
+      })
+      serial += 1
+      return await new Promise(async (resolve, reject) => {
+        try {
+          let data = {
+            notes: $(`#inputNote${serial}`).val()
+          }
+          if (data.notes == '') throw err = "Note should not be empty"
+          let response = await fetch(`${proxyurl}/${apiUrl}/addNotes/${serial}`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+          $(`#viewNotes${serial}`).append($('<li class="list-group-item">').text(data.notes))
+          response = await response.json();
+          alert(response.alert)
+          resolve(response);
+        } catch (err) {
+          alert(err)
+          reject(err);
+        }
+      })
+    }
+
+    const changeDate = async (serial) => {
+      $('.changeDate').submit(function (e) {
+        e.preventDefault();
+      })
+      serial += 1
+      return await new Promise(async (resolve, reject) => {
+        try {
+          let data = {
+            due_date: $(`#inputChangedDate${serial}`).val()
+          }
+          if (data.due_date == '') throw err = "Enter a Valid Date!!"
+          let response = await fetch(`${proxyurl}/${apiUrl}/editDate/${serial}`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+          $(`#viewDate${serial}`).empty().append($('<li class="list-group-item">').text(data.due_date))
+          response = await response.json();
+          alert(response.alert)
+          resolve(response);
+        } catch (err) {
+          alert(err)
+          reject(err);
+        }
+      })
+    }
+
+    const changePriority = async (serial) => {
+      $('.changePriority').submit(function (e) {
+        e.preventDefault();
+      })
+      serial += 1
+      
+      let changedPriorityVal = Number($(`input[name=optionPriority${serial}]:checked`, `#priorityForm${serial}`).val())
+      return await new Promise(async (resolve, reject) => {
+        try {
+          let data = {
+            priority: changedPriorityVal
+          }
+          let response = await fetch(`${proxyurl}/${apiUrl}/editPriority/${serial}`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+          let setPriorityNew = ''
+          if (data.priority == 1) setPriorityNew = 'Low'
+          if (data.priority == 2) setPriorityNew = 'Medium'
+          if (data.priority == 3) setPriorityNew = 'High'
+
+          $(`#viewPriority${serial}`).empty().append($('<li class="list-group-item">').text(setPriorityNew))
+          response = await response.json();
+          alert(response.alert)
+          resolve(response);
+        } catch (err) {
+          alert(err)
+          reject(err);
+        }
+      })
+    }
+
+    const changeStatus = async (serial) => {
+      $('.changeStatus').submit(function (e) {
+        e.preventDefault();
+      })
+      serial += 1
+      let bool = $(`input[name=optionStatus${serial}]:checked`, `#statusForm${serial}`).val()
+      let boolVal = (bool==='true');
+      return await new Promise(async (resolve, reject) => {
+        try {
+          let data = {
+            status: boolVal
+          }
+          let response = await fetch(`${proxyurl}/${apiUrl}/deleteTodo/${serial}`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+          if (data.status == true) setStatus = 'Complete'
+          if (data.status == false) setStatus = 'Incomplete'
+          $(`#viewStatus${serial}`).empty().append($('<li class="list-group-item">').text(setStatus))
+          response = await response.json();
+          alert('Success!')
+          resolve(response);
+        } catch (err) {
+          alert(err)
+          reject(err);
+        }
+      })
+    }
+
+    getData();
+
+
+    $('.addTodo').submit(function (e) {
+      e.preventDefault();
+      sendCred();
+    })
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+  </script>
+</body>
+
+</html>
