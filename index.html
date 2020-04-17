@@ -111,7 +111,7 @@
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" type="text/javascript"></script>
   <script>
-    // const apiUrl = 'https://quiet-eyrie-33557.herokuapp.com/todos'
+    
     const apiUrl = 'https://fathomless-scrubland-15214.herokuapp.com/todos'
     const proxyurl = "https://peaceful-temple-16111.herokuapp.com";
     let serialNumber = 1;
@@ -428,8 +428,8 @@
               'Content-Type': 'application/json'
             },
           })
-          if (data.status == true) setStatus = 'Complete'
-          if (data.status == false) setStatus = 'Incomplete'
+          if (data.status == false) setStatus = 'Complete'
+          if (data.status == true) setStatus = 'Incomplete'
           $(`#viewStatus${serial}`).empty().append($('<li class="list-group-item">').text(setStatus))
           response = await response.json();
           alert('Success!')
